@@ -2,7 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Student;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Psy\Command\WhereamiCommand;
 
 class AuthController extends Controller
 {
@@ -13,17 +16,34 @@ class AuthController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            "name" => "required",
-            "email" => "required"
+            "name" => "required|min:4",
+            "email" => "required|email|unique:students,email",
+            "password" => "required|min:8",
+            "password_confirmation" => "required|same:password"
         ]);
-        return $request;
+        $student = new Student();
+        $student->name = $request->name;
+        $student->email = $request->email;
+        $student->password = Hash::make($request->password);
+        $student->save();
+
+        return redirect()->route('auth.login')->with('message', 'register successful');
     }
     public function login()
     {
         return view('auth.login');
     }
-    public function check()
+    public function check(Request $request)
     {
+        $request->validate([
+            "email" => "required|email|exists:students,email",
+            "password" => "required|min:8"
+        ], [
+            "email.exists" => "Email or Password is wrong"
+        ]);
+
+        $student = Student::where('email', $request->email)->first();
+        return $student;
     }
     public function logout()
     {

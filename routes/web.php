@@ -16,12 +16,8 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('layouts.master');
-});
-
-Route::get('/', function () {
     return view('home');
-});
+})->name('home');
 
 Route::controller(AuthController::class)->group(function () {
     Route::get('register', 'register')->name('auth.register');

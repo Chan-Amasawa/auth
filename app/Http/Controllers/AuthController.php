@@ -6,6 +6,7 @@ use App\Models\Student;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Psy\Command\WhereamiCommand;
+use stdClass;
 
 class AuthController extends Controller
 {
@@ -43,9 +44,15 @@ class AuthController extends Controller
         ]);
 
         $student = Student::where('email', $request->email)->first();
-        return $student;
+        if (!Hash::check($request->password, $student->password)) {
+            return redirect()->route('auth.login')->withErrors(['email' => 'Email or Password is wrong']);
+        };
+        session(["auth" => $student]);
+        return redirect()->route('dashboard.index');
     }
     public function logout()
     {
+        session()->forget('auth');
+        return redirect()->route('auth.login');
     }
 }
